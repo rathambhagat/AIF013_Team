@@ -4,5 +4,4 @@ whitenoise
 python-dotenv
 google-generativeai
 faiss-cpu
-sentence-transformers
 pypdf
