@@ -75,41 +75,6 @@ Gemini Answer Generation
 Answer + Source References
 ```
 
-## 📁 Project Structure
-
-``` text
-sylva/
-├── config/
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── docs/
-│   ├── migrations/
-│   ├── services/
-│   │   ├── extract.py
-│   │   ├── chunking.py
-│   │   ├── embeddings.py
-│   │   ├── vectorstore.py
-│   │   ├── llm.py
-│   │   └── pipeline.py
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   └── tests.py
-├── static/
-│   ├── css/
-│   ├── js/
-│   ├── vendor/
-│   └── sylva/
-├── templates/
-│   ├── landing.html
-│   └── workspace.html
-├── .env.example
-├── manage.py
-├── requirements.txt
-└── README.md
-```
 
 ## 🚀 Getting Started
 
