@@ -53,14 +53,23 @@ def generate_answer(
     answer = None
     last_err = None
 
-    # Try gemini-3.8-flash first, then gemini-flash-latest
-    for model_name in ("gemini-3.8-flash", "gemini-flash-latest"):
+    # Try fast, active Gemini 3.5 models with timeout fallback
+    candidate_models = (
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.6-flash",
+        "gemini-3-flash-preview",
+    )
+    for model_name in candidate_models:
         try:
             model = genai.GenerativeModel(
                 model_name=model_name,
                 system_instruction=_SYSTEM_INSTRUCTION,
             )
-            response = model.generate_content(prompt)
+            response = model.generate_content(
+                prompt,
+                request_options={"timeout": 12},
+            )
             if response and response.text:
                 answer = response.text.strip()
                 break

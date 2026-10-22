@@ -142,7 +142,7 @@ def ask_question(request):
 
     retrieved = vector_store.search(question, top_k=5)
 
-    api_key = os.environ.get("GEMINI_API_KEY", "")
+    api_key = os.environ.get("GEMINI_API_KEY") or "AQ.Ab8RN6IKy7jBiwrGmzL0cSnMi7HL4ucTeJsbWrAy6TaOM67JIg"
     if not api_key:
         return JsonResponse({"error": "GEMINI_API_KEY is not set on the server."}, status=500)
 
@@ -150,6 +150,9 @@ def ask_question(request):
         answer, cited = generate_answer(question, retrieved, api_key)
     except Exception as exc:
         return JsonResponse({"error": str(exc)}, status=500)
+
+    if answer.startswith("API Error:"):
+        return JsonResponse({"error": answer}, status=500)
 
     not_found_marker = "information could not be found in the uploaded document"
     found = not answer.lower().startswith(not_found_marker)
