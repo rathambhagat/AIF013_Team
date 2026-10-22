@@ -113,5 +113,5 @@ MEDIA_ROOT = BASE_DIR / 'uploads'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
