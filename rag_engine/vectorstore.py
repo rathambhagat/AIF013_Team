@@ -57,6 +57,10 @@ class VectorStore:
         self.index.add(embeddings)
         self.metadata.extend(chunks)
 
+    def index(self, chunks: List[Dict]) -> None:
+        """Alias for index_chunks to support both method names."""
+        self.index_chunks(chunks)
+
     def search(self, query: str, top_k: int = 3) -> List[Dict]:
         """Return the *top_k* most relevant chunks for *query*.
 

@@ -28,8 +28,8 @@ def chunk_text(
     chunk_id = 0
 
     for page_dict in pages:
-        page_num: int = page_dict["page"]
-        text: str = page_dict["text"]
+        page_num: int = page_dict.get("page", 1)
+        text: str = page_dict.get("text", "").strip()
 
         if not text:
             continue
@@ -47,5 +47,12 @@ def chunk_text(
             if end >= len(text):
                 break
             start = end - overlap
+
+    if not chunks:
+        chunks.append({
+            "chunk_id": 0,
+            "page": 1,
+            "text": "The uploaded document has no extractable text content.",
+        })
 
     return chunks

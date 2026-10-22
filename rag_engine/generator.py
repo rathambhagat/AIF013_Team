@@ -1,37 +1,74 @@
-import os
+from __future__ import annotations
+
+import warnings
+from typing import List, Dict, Tuple
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import google.generativeai as genai
-from .extractor import extract_text
-from .chunker import chunk_text
-from .vectorstore import VectorStore
 
-def generate_answer(query: str, retrieved_chunks: list, api_key: str = None):
-    if api_key:
-        genai.configure(api_key=api_key)
-    
-    # Initializing the exact model version required by your new API key
-    model = genai.GenerativeModel('gemini-3.8-flash')
-    
-    if not retrieved_chunks:
-        return "Information could not be found in the uploaded document.", []
+_SYSTEM_INSTRUCTION = (
+    "Answer strictly using provided context. "
+    "If missing, output EXACTLY: "
+    "'Information could not be found in the uploaded document.'"
+)
 
-    context_text = "\n\n".join([f"Page {c['page']}: {c['text']}" for c in retrieved_chunks])
-    
-    # System instructions embedded in the prompt body for maximum compatibility
-    prompt = f"""
-    SYSTEM INSTRUCTION: You are a strict document intelligence assistant. 
-    Answer the user's question using ONLY the context provided below. 
-    If the answer is not contained within the context, you must output exactly: 
-    "Information could not be found in the uploaded document."
+_NOT_FOUND = "Information could not be found in the uploaded document."
 
-    CONTEXT:
-    {context_text}
 
-    QUESTION:
-    {query}
+def generate_answer(
+    query: str,
+    retrieved_chunks: List[Dict],
+    api_key: str = None,
+) -> Tuple[str, List[Dict]]:
+    """Generate a grounded answer using Gemini with strict citation context.
+
+    Returns:
+        (answer_string, cited_chunks)
     """
-    
-    try:
-        response = model.generate_content(prompt)
-        return response.text, retrieved_chunks
-    except Exception as e:
-        return f"API Error: {str(e)}", []
+    if not api_key:
+        return "GEMINI_API_KEY is not configured on the server.", []
+
+    genai.configure(api_key=api_key)
+
+    if not retrieved_chunks:
+        return _NOT_FOUND, []
+
+    # Build numbered context block
+    context_parts = []
+    for i, chunk in enumerate(retrieved_chunks, start=1):
+        page = chunk.get('page', 1)
+        text = chunk.get('text', '')
+        context_parts.append(
+            f"[Chunk {i} | Page {page}]\n{text}"
+        )
+    context_block = "\n\n".join(context_parts)
+
+    prompt = (
+        f"Context:\n{context_block}\n\n"
+        f"Question: {query}\n\n"
+        "Answer:"
+    )
+
+    answer = None
+    last_err = None
+
+    # Try gemini-3.8-flash first, then gemini-flash-latest
+    for model_name in ("gemini-3.8-flash", "gemini-flash-latest"):
+        try:
+            model = genai.GenerativeModel(
+                model_name=model_name,
+                system_instruction=_SYSTEM_INSTRUCTION,
+            )
+            response = model.generate_content(prompt)
+            if response and response.text:
+                answer = response.text.strip()
+                break
+        except Exception as exc:
+            last_err = exc
+
+    if answer is None:
+        return f"API Error: {last_err}", []
+
+    cited = [] if answer == _NOT_FOUND else list(retrieved_chunks)
+    return answer, cited
