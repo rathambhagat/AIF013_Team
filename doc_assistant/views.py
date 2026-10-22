@@ -142,7 +142,7 @@ def ask_question(request):
 
     retrieved = vector_store.search(question, top_k=5)
 
-    api_key = os.environ.get("GEMINI_API_KEY") or "AQ.Ab8RN6IKy7jBiwrGmzL0cSnMi7HL4ucTeJsbWrAy6TaOM67JIg"
+    api_key = os.environ.get("GEMINI_API_KEY") or "AQ--"
     if not api_key:
         return JsonResponse({"error": "GEMINI_API_KEY is not set on the server."}, status=500)
 
