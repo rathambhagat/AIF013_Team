@@ -4,6 +4,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
+from dotenv import load_dotenv  # Add this line
 
 from rag_engine.extractor import extract_text
 from rag_engine.chunker import chunk_text
@@ -13,7 +14,17 @@ from rag_engine.generator import generate_answer
 # Global FAISS-backed store – persists for the lifetime of the dev-server process.
 vector_store = VectorStore()
 
+from django.shortcuts import render
 
+def index_view(request):
+    return render(request, 'index.html')
+
+from dotenv import load_dotenv  # Add this line
+
+load_dotenv()  # Add this line to load the .env file into os.environ
+
+from django.http import JsonResponse
+# ... (rest of your imports)
 @csrf_exempt
 def upload_document(request):
     if request.method != "POST":
